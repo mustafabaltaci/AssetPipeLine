@@ -2,12 +2,15 @@ name: Deploy Pixel Architect SaaS
 
 on:
   push:
-    branches: ["main"] # Replace with "master" if your default branch is different
+    branches: ["main"]
 
 permissions:
   contents: read
   pages: write
   id-token: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build_and_deploy:
@@ -19,13 +22,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
-          cache-dependency-path: web-app/package-lock.json
+          cache-dependency-path: '**/package-lock.json' # Flexible path
 
       - name: Install Dependencies
         working-directory: web-app
-        run: npm install
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Build Web App
         working-directory: web-app
