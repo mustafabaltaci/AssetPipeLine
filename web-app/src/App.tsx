@@ -1,16 +1,13 @@
 import { useState, useRef } from 'react'
-import { ProcessedSprite } from './lib/types'
+import { ProcessedSprite, PackingItem } from './lib/types'
 import { DropZone } from './components/DropZone'
 import { applyColorKeying } from './lib/ImageProcessor'
 import { packSprites } from './lib/PackerEngine'
-import { Trash2, Download, Settings, Layers } from 'lucide-react'
+import { Trash2, Settings } from 'lucide-react'
 
 function App() {
   const [sprites, setSprites] = useState<ProcessedSprite[]>([])
   const [baseRes, setBaseRes] = useState(32)
-  const [padding, setPadding] = useState(0)
-  const [colorKey, setColorKey] = useState(false)
-  const [forcePot, setForcePot] = useState(false)
   const [packageName, setPackageName] = useState('MySpriteAtlas')
   const [isProcessing, setIsProcessing] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -26,13 +23,11 @@ function App() {
     setIsProcessing(true)
     try {
       const processed = await Promise.all(sprites.map(async (s) => {
-        if (colorKey) {
-            const keyed = await applyColorKeying(s.bitmap)
-            return { ...s, bitmap: keyed }
-        }
-        return s
+        // Force keying based on UI (always keying white for simplicity in this version)
+        const keyed = await applyColorKeying(s.bitmap)
+        return { ...s, bitmap: keyed }
       }))
-      const result = packSprites(processed, { baseRes, padding, forcePowerOfTwo: forcePot })
+      const result = packSprites(processed, { baseRes, padding: 0, forcePowerOfTwo: false })
       const canvas = canvasRef.current
       if (!canvas) return
       canvas.width = result.width; canvas.height = result.height
@@ -40,7 +35,7 @@ function App() {
       if (!ctx) return
       ctx.imageSmoothingEnabled = false
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      result.items.forEach(item => {
+      result.items.forEach((item: PackingItem) => {
         ctx.drawImage(item.sprite.bitmap, 0, 0, item.sprite.originalWidth, item.sprite.originalHeight, item.x, item.y, item.w, item.h)
       })
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'))
@@ -48,7 +43,7 @@ function App() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a'); a.href = url; a.download = `${packageName}.png`; a.click()
         URL.revokeObjectURL(url)
-        const meta = { name: packageName, size: { w: result.width, h: result.height }, frames: result.items.reduce((acc, item) => {
+        const meta = { name: packageName, size: { w: result.width, h: result.height }, frames: result.items.reduce((acc: Record<string, any>, item: PackingItem) => {
                 acc[item.sprite.name] = { x: item.x, y: item.y, w: item.w, h: item.h }
                 return acc
             }, {} as Record<string, any>) }

@@ -18,7 +18,7 @@ export function DropZone({ onSpritesLoaded }: DropZoneProps) {
 
     return (
         <div 
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onDragOver={(e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); }}
             onDrop={handleDrop}
             style={{
                 border: '2px dashed #444', borderRadius: '12px', padding: '40px',
