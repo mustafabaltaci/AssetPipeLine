@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
-import { ProcessedSprite, PackingItem } from './lib/types'
-import { DropZone } from './components/DropZone'
-import { applyColorKeying } from './lib/ImageProcessor'
-import { packSprites } from './lib/PackerEngine'
+import { ProcessedSprite, PackingItem } from './lib/types.ts'
+import { DropZone } from './components/DropZone.tsx'
+import { applyColorKeying } from './lib/ImageProcessor.ts'
+import { packSprites } from './lib/PackerEngine.ts'
 import { Trash2, Settings } from 'lucide-react'
 
 function App() {
@@ -23,7 +23,6 @@ function App() {
     setIsProcessing(true)
     try {
       const processed = await Promise.all(sprites.map(async (s) => {
-        // Force keying based on UI (always keying white for simplicity in this version)
         const keyed = await applyColorKeying(s.bitmap)
         return { ...s, bitmap: keyed }
       }))

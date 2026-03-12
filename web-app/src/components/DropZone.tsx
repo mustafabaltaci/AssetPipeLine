@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { loadSprite } from '../lib/ImageProcessor';
-import { ProcessedSprite } from '../lib/types';
+import { loadSprite } from '../lib/ImageProcessor.ts';
+import { ProcessedSprite } from '../lib/types.ts';
 import { Upload } from 'lucide-react';
 
 interface DropZoneProps {
